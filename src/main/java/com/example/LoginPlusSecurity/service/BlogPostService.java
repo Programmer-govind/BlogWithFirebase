@@ -1,5 +1,6 @@
 package com.example.LoginPlusSecurity.service;
 
+import com.example.LoginPlusSecurity.model.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,87 +10,13 @@ import org.springframework.stereotype.Service;
 import com.example.LoginPlusSecurity.model.BlogPost;
 import com.example.LoginPlusSecurity.repository.BlogPostRepository;
 
-@Service
-public class BlogPostService {
+import java.util.List;
 
-    private final BlogPostRepository blogPostRepository;
+public interface BlogPostService {
 
-    public BlogPostService(BlogPostRepository blogPostRepository) {
-        this.blogPostRepository = blogPostRepository;
-    }
+    public List<BlogPost> findPaginated(int pageNo, int pageSize, String sortField, String sortDirection);
 
+    Page<BlogPost> findAll(Pageable pageable);
 
-    public Page<BlogPost> homepageSorting(int page, int size, String sortBy) {
-        Sort sort;
-        switch (sortBy) {
-            case "oldest":
-                sort = Sort.by("creationDate").ascending();
-                break;
-            case "views":
-                sort = Sort.by("views").descending();
-                break;
-            default: // latest
-                sort = Sort.by("creationDate").descending();
-        }
-        Pageable pageable = PageRequest.of(page, size, sort);
-        return blogPostRepository.findAll(pageable);
-    }
-
-    public Page<BlogPost> titleSorting(String query, int page, int size, String sortBy) {
-        Sort sort;
-        switch (sortBy) {
-            case "oldest":
-                sort = Sort.by("creationDate").ascending();
-                break;
-            case "views":
-                sort = Sort.by("views").descending();
-                break;
-            default: // latest blog
-                sort = Sort.by("creationDate").descending();
-        }
-        Pageable pageable = PageRequest.of(page, size, sort);
-        return blogPostRepository.findByTitleContainingIgnoreCase(query, pageable);
-    }
-
-    public Page<BlogPost> categorySorting(Long categoryId, int page, int size, String sortBy) {
-        Sort sort;
-        switch (sortBy) {
-            case "oldest":
-                sort = Sort.by("creationDate").ascending();
-                break;
-            case "views":
-                sort = Sort.by("views").descending();
-                break;
-            default: // latest blogs
-                sort = Sort.by("creationDate").descending();
-        }
-        Pageable pageable = PageRequest.of(page, size, sort);
-        return blogPostRepository.findByCategoryId(categoryId, pageable);
-    }
-
-
-
-
-    public void saveBlogPost(BlogPost blogPost) {
-        String slug = generateSlug(blogPost.getTitle());
-        blogPost.setSlug(slug);
-        blogPostRepository.save(blogPost);
-    }
-
-    
-    public BlogPost findBySlug(String slug) {
-        return blogPostRepository.findBySlug(slug)
-                .orElseThrow(() -> new RuntimeException("Blog post not found!"));
-    }
-
-
-    private String generateSlug(String title) {
-        String slug = title.toLowerCase() // Convert to lowercase
-                        .replaceAll("[^a-z0-9\\s-]", "") // Remove invalid characters
-                        .trim() // Remove leading and trailing spaces
-                        .replaceAll("\\s+", "-"); // Replace spaces with "-"
-        return slug.replaceAll("^-|-$", ""); // Remove leading/trailing "-"
-    }
-
-    
+    Page<BlogPost> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 }
