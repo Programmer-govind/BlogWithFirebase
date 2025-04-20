@@ -3,16 +3,18 @@ package com.example.LoginPlusSecurity.controller;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.LoginPlusSecurity.model.User;
 import com.example.LoginPlusSecurity.service.UserService;
 
-@Controller
+@RestController
 @RequestMapping("/user")
 public class UserController {
 
@@ -20,19 +22,13 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/{username}")
-    public String getUserDetails(@PathVariable String username, Model model) {
+    public ResponseEntity<User> getUserDetails(@PathVariable String username) {
         Optional<User> user = userService.getUserByName(username);
         if (user.isPresent()) {
-            model.addAttribute("user", user.get());
-            return "user-details";
+            return new ResponseEntity<User>(user.get(),HttpStatus.OK);
         }
         else {
-            model.addAttribute("error", "User not found");
-            return "error";
+            return new ResponseEntity("User does not exist...",HttpStatus.NOT_FOUND);
         }
     }
-//    @GetMapping("")
-//    public String userProfile() {
-//    	
-//    }
 }
